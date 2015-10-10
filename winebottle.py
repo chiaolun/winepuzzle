@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# This is the solution to the poisoned wine problem for 2 poisoned
+# bottles of wine and 1000 testers
+
 from scipy.misc import comb
 from numpy import array, dot, outer, eye
 from itertools import groupby, product, chain, combinations
@@ -45,7 +48,7 @@ def partition(n,k,aux=[]):
     if k == 1:
         return aux + [n]
     else:
-        parts = [partition(n-i, k-1, aux + [i]) for i in range(n+1)] 
+        parts = [partition(n-i, k-1, aux + [i]) for i in range(n+1)]
         if k == 2:
             return parts
         else:
@@ -67,8 +70,8 @@ def opt_weights(norm,cases,labels):
     def score(comb):
         assert sum(comb) == Nbottles
         baserem = [divmod(combi,int(n)) for combi, n in zip(comb,norm)]
-        return max([sum([(base*int(case0) + min(rem,int(case0))) 
-                         for (base, rem), case0 in zip(baserem,case)]) 
+        return max([sum([(base*int(case0) + min(rem,int(case0)))
+                         for (base, rem), case0 in zip(baserem,case)])
                     for case in cases])
     return min([(score(comb), list(comb)) for comb in combs])
 
@@ -107,4 +110,3 @@ for l in label_sets:
 #        print l, waste
 
 opt_allocation(best_sol[1],verbose=1)
-
