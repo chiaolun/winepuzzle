@@ -11,10 +11,11 @@ from pulp import (
     allcombinations,
 )
 
-nmice = 1
-nbottles = 2
-npoisoned = 1
-labels = range(2**nmice)
+nmice = 10
+nbottles = 1000
+npoisoned = 2
+nlabels = 2**nmice
+labels = range(nlabels)
 
 # Arbitrary large number to be used later
 M = nbottles
@@ -29,6 +30,9 @@ allocs = LpVariable.dicts(
     0, nbottles,
     LpInteger,
 )
+# Not implemented
+# for i, alloc in allocs.items():
+#     alloc.setInitialValue(nbottles // nlabels + (i < nbottles % nlabels))
 
 # They must sum to nbottles:
 prob += lpSum(allocs) == nbottles
@@ -80,26 +84,32 @@ for i in labels:
     nonzero0 = alloc_nonzero[i]
     prob += alloc0 <= nonzero0 * M
 
+ll = []
+lz = []
+lsv = []
 
 for scenario in labels:
     scenario_labels = [(scenario, i) for i in scenario2labels[scenario]]
     scenario_label_sets = [(scenario, ls) for ls in scenario2label_sets[scenario]]
-    label_nonzero = LpVariable.dicts(
-        "label_nonzero",
+    label_zero = LpVariable.dicts(
+        "label_zero",
         scenario_labels,
         0, nbottles, LpInteger,
     )
+    lz.extend(label_zero.values())
+
     label_sets = LpVariable.dicts(
         "label_set_active",
         scenario_label_sets,
         0, 1, LpInteger,
     )
+    lsv.extend(label_sets.values())
 
     for label_set0 in scenario_label_sets:
         label_set_var = label_sets[label_set0]
-        prob += lpSum([alloc_nonzero[i] for i in label_set0[1]]) - len(label_set0[1]) >= - label_set_var * M
+        prob += lpSum(alloc_nonzero[i] for i in label_set0[1]) - label_set_var * M <= len(label_set0[1]) - 1
         for label0 in label_set0[1]:
-            prob += label_nonzero[(scenario, label0)] >= label_set_var
+            prob += label_zero[(scenario, label0)] <= (1 - label_set_var)
 
     loss = scenario_loss[scenario]
     label_loss = LpVariable.dicts(
@@ -107,10 +117,11 @@ for scenario in labels:
         scenario_labels,
         0, nbottles, LpInteger,
     )
+    ll.extend(label_loss.values())
     prob += lpSum(label_loss) == loss
 
     for label0 in scenario_labels:
-        prob += label_loss[label0] >= allocs[label0[1]] - (1 - label_nonzero[label0]) * M
+        prob += label_loss[label0] >= allocs[label0[1]] - label_zero[label0] * M
 
 prob.writeLP("drunk_mice.lp")
 prob.solve()
