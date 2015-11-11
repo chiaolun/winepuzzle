@@ -110,3 +110,40 @@ for l in label_sets:
 #        print l, waste
 
 opt_allocation(best_sol[1],verbose=1)
+
+# Group the 1000 bottles as follows:
+#    1 10C0 labels get   1 groups with   42 bottles each, and   0 groups with   43 bottles each
+#   10 10C1 labels get   4 groups with   12 bottles each, and   6 groups with   13 bottles each
+#   45 10C2 labels get  44 groups with    5 bottles each, and   1 groups with    6 bottles each
+#  120 10C3 labels get 114 groups with    5 bottles each, and   6 groups with    6 bottles each
+# If 0 mice die,
+#   discard    1 10C0 labels which at worst have   42 bottles
+#   totalling to 42 bottles of wine lost
+# If 1 mice die,
+#   discard    1 10C0 labels which at worst have   42 bottles
+#   discard    1 10C1 labels which at worst have   13 bottles
+#   totalling to 55 bottles of wine lost
+# If 2 mice die,
+#   discard    1 10C0 labels which at worst have   42 bottles
+#   discard    2 10C1 labels which at worst have   26 bottles
+#   discard    1 10C2 labels which at worst have    6 bottles
+#   totalling to 74 bottles of wine lost
+# If 3 mice die,
+#   discard    1 10C0 labels which at worst have   42 bottles
+#   discard    3 10C1 labels which at worst have   39 bottles
+#   discard    3 10C2 labels which at worst have   16 bottles
+#   discard    1 10C3 labels which at worst have    6 bottles
+#   totalling to 103 bottles of wine lost
+# If 4 mice die,
+#   discard    4 10C1 labels which at worst have   52 bottles
+#   discard    6 10C2 labels which at worst have   31 bottles
+#   discard    4 10C3 labels which at worst have   24 bottles
+#   totalling to 107 bottles of wine lost
+# If 5 mice die,
+#   discard   10 10C2 labels which at worst have   51 bottles
+#   discard   10 10C3 labels which at worst have   56 bottles
+#   totalling to 107 bottles of wine lost
+# If 6 mice die,
+#   discard   20 10C3 labels which at worst have  106 bottles
+#   totalling to 106 bottles of wine lost
+# The worst possible loss is  107 bottles.
