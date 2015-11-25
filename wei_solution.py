@@ -6,23 +6,22 @@ import numpy as np
 nmice = 10
 nbottles = 1000
 nlabels = 2**nmice
+npoisoned = 2
 labels = range(nlabels)
-
-tothrow = np.zeros((nlabels,nlabels,nlabels),dtype=bool)
-for i, j in combinations(labels, 2):
-    k = i | j
-    tothrow[k,i,j] = True
-    tothrow[k,j,i] = True
-for i in labels:
-    tothrow[i,i,i] = True
 
 # The resulting losses for every possible outcome would be
 def worst_loss(alloc):
-    nonzero = alloc > 0
-    nonzero = np.outer(nonzero, nonzero)
-    losses = (tothrow * nonzero).any(axis=2).dot(alloc)
-    kmax = losses.argmax()
-    return losses[kmax], kmax
+    nonzeros = [l for l in labels if alloc[l] > 0]
+    loss_sets = [set() for _ in range(nlabels)]
+    for N in range(1, npoisoned + 1):
+        for label_set in combinations(nonzeros, N):
+            scenario = 0
+            for label in label_set:
+                scenario |= label
+            for label in label_set:
+                loss_sets[scenario].add(label)
+    losses = [sum([alloc[i] for i in loss_set]) for loss_set in loss_sets]
+    return max([(x, i) for i, x in enumerate(losses)])
 
 alloc = map(ord, 'x\x9c\xe3\xe5\xe5e\xe0e``\xe0E\xa3a\x00\x9d\x8f\x0e\xd0\xf5Q\xaa\x9f\x87\x87\x87\x81\x07I\x1e\x9dOm\x003\x1f\x9d\xa6\x97\xfd\x03\rF\xba\xffG:\x00\x00\x8f~\x03\xe9'.decode('zip'))
 alloc = np.array(alloc)
